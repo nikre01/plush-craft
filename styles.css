@@ -748,16 +748,16 @@ h1, h2, h3, h4, h5 {
   margin-bottom: 40px;
 }
 
-/* Harmonized Terracotta CTA for Instagram */
+/* Aesthetic Brush CTA for Instagram (Matched radius, original craft background & border) */
 .btn-insta-brush {
   background: var(--color-brand-rose);
   color: #FFFFFF !important;
   padding: 12px 24px;
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 0.88rem;
-  box-shadow: var(--shadow-sm);
-  border: 1px solid transparent;
+  font-size: 0.92rem;
+  box-shadow: 0 4px 14px rgba(168, 82, 68, 0.25);
+  border: 1.5px dashed rgba(255, 255, 255, 0.45);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   text-decoration: none;
   display: inline-flex;
@@ -769,7 +769,7 @@ h1, h2, h3, h4, h5 {
 .btn-insta-brush:hover {
   background: var(--color-brand-rose-hover);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
+  box-shadow: 0 6px 18px rgba(168, 82, 68, 0.35);
 }
 
 .hero-metrics {
@@ -1916,7 +1916,11 @@ h1, h2, h3, h4, h5 {
   }
 
   .craft-bow-accent {
-    display: none; /* Avoid overlapping hero text on mobile */
+    width: 48px;
+    height: 48px;
+    top: 5px;
+    left: 10px;
+    display: block;
   }
 
   .hero-pretitle {
@@ -1957,10 +1961,13 @@ h1, h2, h3, h4, h5 {
   .hero-metrics {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
-    padding: 12px 6px;
-    background: rgba(255, 255, 255, 0.75);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-border);
+    padding-top: 18px;
+    border-top: 1px dashed var(--color-border);
+    background: transparent;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    border-radius: 0;
     margin-bottom: 10px;
   }
 
