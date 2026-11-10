@@ -2251,25 +2251,30 @@
         return;
       }
 
-      container.innerHTML = inquiries.map((inq) => `
-        <div class="inquiry-card">
-          <div class="inquiry-info">
-            <strong>${inq.name || 'Anonymous Guest'}</strong>
-            <div class="inquiry-meta">
-              <span>📱 ${inq.phone || 'Not provided'}</span> • 
-              <span>🕒 ${inq.date || 'Recently'}</span>
+      container.innerHTML = inquiries.map((inq) => {
+        const isInstagram = (inq.name || '').includes('Instagram') || (inq.phone || '').includes('Instagram');
+        const badgeColor = isInstagram ? '#E1306C' : '#128C7E';
+        const badgeBg = isInstagram ? 'rgba(225, 48, 108, 0.1)' : 'rgba(18, 140, 126, 0.1)';
+        const badgeLabel = isInstagram ? '📸 Instagram Order' : '💬 WhatsApp Order';
+
+        const content = [inq.message, inq.itemsSummary].filter(Boolean).join('\n\n');
+
+        return `
+        <div class="inquiry-card" style="background:#FFF;border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+          <div class="inquiry-info" style="width:100%;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <strong style="font-size:1.02rem;color:var(--ink);">${escapeHtml(inq.name || 'Website Order')}</strong>
+                <span style="background:${badgeBg};color:${badgeColor};font-size:0.75rem;padding:3px 10px;border-radius:12px;font-weight:700;">${badgeLabel}</span>
+              </div>
+              <span style="font-size:0.78rem;color:var(--ink-muted);">🕒 ${inq.date || 'Recently'}</span>
             </div>
-            <div class="inquiry-text">${inq.message || inq.itemsSummary || '(No custom message)'}</div>
-          </div>
-          <div>
-            ${inq.phone ? `
-              <a href="https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(inq.name || '')}!%20🌸%20Following%20up%20from%20Plush%20Crafts." target="_blank" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 12px; background: #25D366; border-color: #25D366;">
-                Chat on WhatsApp
-              </a>
-            ` : ''}
+            ${inq.phone && !inq.phone.includes('DM') ? `<div style="font-size:0.8rem;color:var(--ink-muted);margin-bottom:8px;">📱 Customer: <strong>${escapeHtml(inq.phone)}</strong></div>` : ''}
+            <div class="inquiry-text" style="white-space:pre-line;background:#FAF7F2;padding:12px 14px;border-radius:6px;border:1px solid var(--border);font-size:0.86rem;color:var(--ink);line-height:1.6;margin-top:8px;">${escapeHtml(content || '(Order details)')}</div>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function clearInquiriesLog() {

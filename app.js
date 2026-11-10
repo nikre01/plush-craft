@@ -1636,6 +1636,13 @@ function inquireAtelierViaWhatsApp() {
     ? atelierState.embellishments.map(e => e.name).join(', ')
     : 'Standard Packaging';
 
+  logCustomerInquiry(
+    'Custom Studio (WhatsApp)',
+    '',
+    `Custom Order: ${atelierState.base.name} (${atelierState.palette.name})`,
+    `Extras: ${embellishText}\nCard: "${atelierState.dedication}"\nTotal: ₹ ${total.toLocaleString('en-IN')}`
+  );
+
   const message = 
 `Hello Plush Crafts! 🌸
 I would like to order a custom handcrafted piece:
@@ -1657,6 +1664,13 @@ function inquireAtelierViaInstagram() {
   const embellishText = atelierState.embellishments.length > 0
     ? atelierState.embellishments.map(e => e.name).join(', ')
     : 'Standard';
+
+  logCustomerInquiry(
+    'Custom Studio (Instagram DM)',
+    '@plush_crafts.in DM',
+    `Custom Order: ${atelierState.base.name} (${atelierState.palette.name})`,
+    `Extras: ${embellishText}\nCard: "${atelierState.dedication}"\nTotal: ₹ ${total.toLocaleString('en-IN')}`
+  );
 
   const message = 
 `Hello Plush Crafts (@plush_crafts.in)! 🌸
@@ -1956,6 +1970,13 @@ Please share UPI details so I can make the payment. Thank you! ♡`;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text);
   }
+
+  logCustomerInquiry(
+    'Instagram Bag Order',
+    '@plush_crafts.in DM',
+    'Shopping Bag Order Lead',
+    summary + `\nTotal: ₹ ${finalTotal.toLocaleString('en-IN')}`
+  );
 
   showToast('✓ Bag order summary copied! Opening Instagram DM...');
   setTimeout(() => {
