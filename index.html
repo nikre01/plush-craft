@@ -250,25 +250,11 @@
             type="text" 
             id="storeSearchInput" 
             class="store-search-input" 
-            placeholder="Search 70+ bouquets, roses, sunflowers, diyas, lamps, colors..." 
+            placeholder="Search bouquets, flowers, colors, or craft code..." 
             autocomplete="off"
             oninput="handleStoreSearch(this.value)"
           />
           <button id="storeSearchClear" class="store-search-clear" onclick="clearStoreSearch()" aria-label="Clear Search" style="display: none;">✕</button>
-        </div>
-
-        <!-- Quick Suggestion Tag Pills -->
-        <div class="search-suggestion-pills">
-          <span style="font-size: 0.76rem; font-weight: 700; color: var(--color-ink-muted); margin-right: 4px;">Suggestions:</span>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('rose')">🌹 Roses</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('sunflower')">🌻 Sunflowers</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('tulip')">🌷 Tulips</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('diya')">🪔 Diya & Decor</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('lamp')">💡 Glowing Lamps</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('pink')">💖 Pink</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('blue')">💙 Blue</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('spiderman')">🕷️ Spider-Man</button>
-          <button type="button" class="pill-chip" onclick="applySearchQuery('keychain')">🔑 Keychains</button>
         </div>
 
         <!-- Live Search Status Banner -->
@@ -283,8 +269,6 @@
         <button class="filter-tab active" data-filter-key="all">All Items (70+)</button>
         <button class="filter-tab" data-filter-key="bouquets">Floral Bouquets</button>
         <button class="filter-tab" data-filter-key="decor">Diya & Festive Decor</button>
-        <button class="filter-tab" data-filter-key="lamps">Glowing Lamps</button>
-        <button class="filter-tab" data-filter-key="accessories">Keychains & Charms</button>
       </div>
 
       <!-- Products Grid -->
