@@ -583,7 +583,7 @@
         </div>
         <div class="metric-card">
           <div class="metric-card-label">Active Promo Code</div>
-          <div class="metric-card-value" style="font-size: 1.4rem; color: var(--brand-rose);">PLUSH10 (10%)</div>
+          <div id="statActivePromo" class="metric-card-value" style="font-size: 1.4rem; color: var(--brand-rose);">PLUSH10 (10%)</div>
         </div>
       </div>
 
@@ -647,20 +647,14 @@
       <section id="discountsTab" class="tab-panel" style="display: none;">
         <div class="panel-header-row">
           <div>
-            <h2 class="panel-title">Active Discount Codes</h2>
-            <p style="font-size: 0.82rem; color: var(--ink-muted);">Coupon codes customers can apply in their shopping bag.</p>
+            <h2 class="panel-title">Active Discount Codes & Offers</h2>
+            <p style="font-size: 0.82rem; color: var(--ink-muted);">Create, edit, activate, or change discount codes customers can apply in their shopping bag.</p>
           </div>
+          <button class="btn btn-rose" onclick="openAddCouponModal()">+ Add New Coupon</button>
         </div>
 
-        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; max-width: 600px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--surface-soft); border-radius: 6px; margin-bottom: 16px;">
-            <div>
-              <strong style="font-size: 1.1rem; color: var(--brand-rose);">PLUSH10</strong>
-              <div style="font-size: 0.8rem; color: var(--ink-muted);">10% Flat Discount on all bouquets</div>
-            </div>
-            <span class="badge-tag" style="background: #DCFCE7; color: #166534; border-color: #BBF7D0;">Active</span>
-          </div>
-          <p style="font-size: 0.85rem; color: var(--ink-muted);">Customers can enter this code in the shopping bag drawer to get an instant 10% discount on order calculation.</p>
+        <div id="couponsContainer" style="display: flex; flex-direction: column; gap: 14px; max-width: 680px;">
+          <!-- Dynamically populated via JS -->
         </div>
       </section>
 
@@ -804,6 +798,47 @@
     </div>
   </div>
 
+  <!-- Add / Edit Coupon Modal -->
+  <div id="couponModalBackdrop" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 460px;">
+      <div class="modal-header">
+        <h3 id="couponModalTitle" style="font-size: 1.2rem; font-weight: 800;">Edit Discount Coupon</h3>
+        <button onclick="closeCouponModal()" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="couponForm" onsubmit="saveCoupon(event)">
+        <input type="hidden" id="editCouponIndex" />
+
+        <div class="form-group">
+          <label>Coupon Promo Code *</label>
+          <input type="text" id="couponCode" class="form-input" required placeholder="e.g. PLUSH10 or FESTIVE20" style="text-transform: uppercase; font-weight: 700; letter-spacing: 0.05em;" />
+          <span style="font-size: 0.72rem; color: var(--ink-muted);">Code entered by customers at checkout.</span>
+        </div>
+
+        <div class="form-group">
+          <label>Discount Percentage (%) *</label>
+          <input type="number" id="couponPercent" class="form-input" required min="1" max="99" placeholder="10" />
+          <span style="font-size: 0.72rem; color: var(--ink-muted);">Percentage deducted from subtotal (e.g. 10 for 10% off, 20 for 20% off).</span>
+        </div>
+
+        <div class="form-group">
+          <label>Offer Description</label>
+          <input type="text" id="couponDesc" class="form-input" placeholder="e.g. 10% Flat Discount on all bouquets" />
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 10px;">
+          <input type="checkbox" id="couponActive" style="width: 18px; height: 18px; accent-color: var(--brand-rose); cursor: pointer;" checked />
+          <label for="couponActive" style="margin-bottom: 0; cursor: pointer; font-size: 0.88rem; font-weight: 600;">Active (Customers can use this code on website)</label>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-outline" onclick="closeCouponModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Coupon</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Code Snippet Export Modal -->
   <div id="exportModalBackdrop" class="modal-backdrop">
     <div class="modal-card">
@@ -832,6 +867,16 @@
     const CATALOG_VERSION = 'v3_clean_catalog';
     const CATALOG_VERSION_KEY = 'plush_catalog_version';
     const INQUIRIES_KEY = 'plush_inquiries_log';
+    const COUPONS_KEY = 'plush_discount_coupons';
+    const DEFAULT_COUPONS = [
+      {
+        code: 'PLUSH10',
+        percent: 10,
+        description: '10% Flat Discount on all bouquets',
+        active: true
+      }
+    ];
+    let currentCoupons = [];
 
     // Initial 9 authentic items from @plush_crafts.in
     const FALLBACK_PRODUCTS = [
@@ -2145,6 +2190,7 @@
 
       renderProductsTable();
       renderInquiries();
+      loadCoupons();
       updateMetrics();
     }
 
@@ -2358,6 +2404,146 @@
       const code = JSON.stringify(currentProducts, null, 2);
       document.getElementById('exportCodeArea').value = `// Paste this updated array into app.js:\nconst PRODUCTS = ${code};`;
       document.getElementById('exportModalBackdrop').classList.add('active');
+    }
+
+    // --- Discount & Coupon Management ---
+    function loadCoupons() {
+      try {
+        const stored = localStorage.getItem(COUPONS_KEY);
+        if (stored) {
+          currentCoupons = JSON.parse(stored);
+        } else {
+          currentCoupons = [...DEFAULT_COUPONS];
+          localStorage.setItem(COUPONS_KEY, JSON.stringify(currentCoupons));
+        }
+      } catch {
+        currentCoupons = [...DEFAULT_COUPONS];
+      }
+      renderCoupons();
+      updatePromoMetric();
+    }
+
+    function renderCoupons() {
+      const container = document.getElementById('couponsContainer');
+      if (!container) return;
+
+      if (!currentCoupons || currentCoupons.length === 0) {
+        container.innerHTML = `
+          <div style="background: #FFFFFF; border: 1.5px dashed var(--border); border-radius: var(--radius-md); padding: 36px 20px; text-align: center; color: var(--ink-muted);">
+            <p style="font-size: 1.15rem; font-weight: 700; color: var(--ink); margin-bottom: 6px;">No Discount Coupons Yet</p>
+            <p style="font-size: 0.85rem; margin-bottom: 18px;">Create a discount code for your customers to apply in their shopping bag!</p>
+            <button class="btn btn-rose" onclick="openAddCouponModal()">+ Create First Coupon</button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = currentCoupons.map((c, idx) => `
+        <div style="background: #FFFFFF; border: 1.5px solid var(--border); border-radius: var(--radius-md); padding: 20px 24px; box-shadow: var(--shadow-sm); display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 6px;">
+              <strong style="font-size: 1.3rem; font-weight: 800; color: var(--brand-rose); letter-spacing: 0.06em;">${c.code}</strong>
+              <span class="badge-tag" style="background: ${c.active ? '#DCFCE7' : '#F3F4F6'}; color: ${c.active ? '#166534' : '#6B7280'}; border-color: ${c.active ? '#BBF7D0' : '#E5E7EB'}; font-size: 0.74rem;">
+                ${c.active ? '● Active' : '○ Inactive'}
+              </span>
+              <span style="font-size: 0.88rem; font-weight: 800; color: var(--ink); background: var(--surface-soft); padding: 3px 10px; border-radius: var(--radius-xs);">
+                ${c.percent}% OFF
+              </span>
+            </div>
+            <div style="font-size: 0.86rem; color: var(--ink-muted);">${c.description || `${c.percent}% discount on all products`}</div>
+          </div>
+
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" style="padding: 7px 14px; font-size: 0.82rem;" onclick="openEditCouponModal(${idx})">✏️ Edit</button>
+            <button class="btn btn-outline" style="padding: 7px 14px; font-size: 0.82rem;" onclick="toggleCouponActive(${idx})">
+              ${c.active ? 'Disable' : 'Enable'}
+            </button>
+            <button class="btn btn-danger" style="padding: 7px 12px; font-size: 0.82rem;" onclick="deleteCoupon(${idx})">🗑️ Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updatePromoMetric() {
+      const el = document.getElementById('statActivePromo');
+      if (!el) return;
+      const firstActive = currentCoupons.find(c => c.active);
+      if (firstActive) {
+        el.textContent = `${firstActive.code} (${firstActive.percent}%)`;
+      } else {
+        el.textContent = 'None Active';
+      }
+    }
+
+    function openAddCouponModal() {
+      document.getElementById('couponModalTitle').textContent = 'Add New Discount Coupon';
+      document.getElementById('couponForm').reset();
+      document.getElementById('editCouponIndex').value = '';
+      document.getElementById('couponActive').checked = true;
+      document.getElementById('couponModalBackdrop').classList.add('active');
+    }
+
+    function openEditCouponModal(idx) {
+      const c = currentCoupons[idx];
+      if (!c) return;
+      document.getElementById('couponModalTitle').textContent = 'Edit Discount Coupon';
+      document.getElementById('editCouponIndex').value = idx;
+      document.getElementById('couponCode').value = c.code;
+      document.getElementById('couponPercent').value = c.percent;
+      document.getElementById('couponDesc').value = c.description || '';
+      document.getElementById('couponActive').checked = !!c.active;
+      document.getElementById('couponModalBackdrop').classList.add('active');
+    }
+
+    function closeCouponModal() {
+      document.getElementById('couponModalBackdrop').classList.remove('active');
+    }
+
+    function saveCoupon(e) {
+      e.preventDefault();
+      const idxStr = document.getElementById('editCouponIndex').value;
+      const code = document.getElementById('couponCode').value.trim().toUpperCase();
+      const percent = parseInt(document.getElementById('couponPercent').value, 10);
+      const desc = document.getElementById('couponDesc').value.trim();
+      const active = document.getElementById('couponActive').checked;
+
+      if (!code || isNaN(percent) || percent < 1 || percent > 99) {
+        alert('Please enter a valid code and percentage between 1% and 99%');
+        return;
+      }
+
+      const couponData = { code, percent, description: desc, active };
+
+      if (idxStr !== '') {
+        const idx = parseInt(idxStr, 10);
+        currentCoupons[idx] = couponData;
+      } else {
+        currentCoupons.push(couponData);
+      }
+
+      localStorage.setItem(COUPONS_KEY, JSON.stringify(currentCoupons));
+      closeCouponModal();
+      renderCoupons();
+      updatePromoMetric();
+      alert(`Coupon "${code}" saved successfully! Customers can now apply it on your website.`);
+    }
+
+    function toggleCouponActive(idx) {
+      if (currentCoupons[idx]) {
+        currentCoupons[idx].active = !currentCoupons[idx].active;
+        localStorage.setItem(COUPONS_KEY, JSON.stringify(currentCoupons));
+        renderCoupons();
+        updatePromoMetric();
+      }
+    }
+
+    function deleteCoupon(idx) {
+      if (confirm(`Are you sure you want to delete coupon "${currentCoupons[idx].code}"?`)) {
+        currentCoupons.splice(idx, 1);
+        localStorage.setItem(COUPONS_KEY, JSON.stringify(currentCoupons));
+        renderCoupons();
+        updatePromoMetric();
+      }
     }
 
     // --- PIN Management ---

@@ -1818,17 +1818,43 @@ function evaluatePinCode() {
   `;
 }
 
+let appliedCouponCode = '';
+
+function getActiveCoupons() {
+  try {
+    const stored = localStorage.getItem('plush_discount_coupons');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+  } catch (err) {
+    console.warn('Using default coupons:', err);
+  }
+  return [
+    { code: 'PLUSH10', percent: 10, description: '10% Flat Discount on all bouquets', active: true }
+  ];
+}
+
 function applyAtelierCode() {
   const input = document.getElementById('atelierCodeInput');
   if (!input) return;
   const code = input.value.trim().toUpperCase();
 
-  if (code === 'PLUSH10') {
-    appliedDiscount = 10;
+  const coupons = getActiveCoupons();
+  const match = coupons.find(c => c.code.toUpperCase() === code && c.active);
+
+  if (match) {
+    appliedDiscount = match.percent;
+    appliedCouponCode = match.code;
     refreshCartState();
-    alert('Code PLUSH10 applied! 10% discount added to your cart.');
+    alert(`Code "${match.code}" applied! ${match.percent}% discount added to your shopping bag.`);
   } else {
-    alert('Use code "PLUSH10" to get 10% off.');
+    const activeCodes = coupons.filter(c => c.active).map(c => c.code);
+    if (activeCodes.length > 0) {
+      alert(`Invalid promo code. Active code: ${activeCodes.join(', ')}`);
+    } else {
+      alert('Invalid or expired coupon code.');
+    }
   }
 }
 
@@ -1855,7 +1881,7 @@ ${summary}
 
 Subtotal: ₹ ${subtotal.toLocaleString('en-IN')}
 Shipping: ${shippingFee === 0 ? 'Free Shipping (Above ₹999)' : '₹ ' + shippingFee}
-${discountAmount > 0 ? `Discount (PLUSH10): -₹ ${discountAmount.toLocaleString('en-IN')}\n` : ''}Total Amount: ₹ ${finalTotal.toLocaleString('en-IN')}
+${discountAmount > 0 ? `Discount (${appliedCouponCode || 'PROMO'} - ${appliedDiscount}%): -₹ ${discountAmount.toLocaleString('en-IN')}\n` : ''}Total Amount: ₹ ${finalTotal.toLocaleString('en-IN')}
 
 Please share UPI details for payment. Thank you! ♡`;
 
