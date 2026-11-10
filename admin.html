@@ -831,6 +831,8 @@
     const PIN_KEY = 'plush_admin_pin';
     const AUTH_SESSION_KEY = 'plush_admin_session';
     const CATALOG_KEY = 'plush_catalog_products';
+    const CATALOG_VERSION = 'v2_73_items';
+    const CATALOG_VERSION_KEY = 'plush_catalog_version';
     const INQUIRIES_KEY = 'plush_inquiries_log';
 
     // Initial 9 authentic items from @plush_crafts.in
@@ -2119,17 +2121,28 @@
 
     // --- Data Loaders & Renderers ---
     function loadAdminData() {
-      // Load products
+      const storedVersion = localStorage.getItem(CATALOG_VERSION_KEY);
       const stored = localStorage.getItem(CATALOG_KEY);
-      if (stored) {
+      
+      if (stored && storedVersion === CATALOG_VERSION) {
         try {
-          currentProducts = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          if (Array.isArray(parsed) && parsed.length >= FALLBACK_PRODUCTS.length) {
+            currentProducts = parsed;
+          } else {
+            currentProducts = [...FALLBACK_PRODUCTS];
+            localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+            localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
+          }
         } catch {
           currentProducts = [...FALLBACK_PRODUCTS];
+          localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+          localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
         }
       } else {
         currentProducts = [...FALLBACK_PRODUCTS];
         localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+        localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
       }
 
       renderProductsTable();
@@ -2332,12 +2345,13 @@
     }
 
     function resetToDefaultCatalog() {
-      if (confirm('Reset your catalog to the original 9 @plush_crafts.in products?')) {
+      if (confirm('Reset your catalog to all 73 handcrafted products from @plush_crafts.in?')) {
         currentProducts = [...FALLBACK_PRODUCTS];
         localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+        localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
         renderProductsTable();
         updateMetrics();
-        alert('Catalog reset to initial 9 products.');
+        alert('Catalog reset to all 73 authentic products!');
       }
     }
 

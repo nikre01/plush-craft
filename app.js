@@ -1181,15 +1181,22 @@ const DEFAULT_PRODUCTS = [
 ];
 
 // --- Persistent Catalog Sync with Private Admin Atelier ---
+const CATALOG_VERSION = 'v2_73_items';
+const CATALOG_VERSION_KEY = 'plush_catalog_version';
+
 function getActiveProducts() {
   try {
+    const storedVersion = localStorage.getItem(CATALOG_VERSION_KEY);
     const custom = localStorage.getItem('plush_catalog_products');
-    if (custom) {
+    if (custom && storedVersion === CATALOG_VERSION) {
       const parsed = JSON.parse(custom);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed) && parsed.length >= DEFAULT_PRODUCTS.length) {
         return parsed;
       }
     }
+    // Auto-migrate if stored products are outdated (< 73 items)
+    localStorage.setItem('plush_catalog_products', JSON.stringify(DEFAULT_PRODUCTS));
+    localStorage.setItem(CATALOG_VERSION_KEY, CATALOG_VERSION);
   } catch (err) {
     console.warn('Using default catalog:', err);
   }
@@ -1383,6 +1390,7 @@ function renderCollection() {
   const container = document.getElementById('collectionGrid');
   if (!container) return;
 
+  PRODUCTS = getActiveProducts();
   let items = PRODUCTS;
 
   // 1. Filter by Category tab
