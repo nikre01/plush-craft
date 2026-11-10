@@ -1315,7 +1315,7 @@ function initPreloader() {
   preloader.style.cursor = 'pointer';
   preloader.addEventListener('click', dismissPreloader);
 
-  const duration = window.innerWidth <= 768 ? 2200 : 4500;
+  const duration = window.innerWidth <= 768 ? 3500 : 4200;
   preloaderTimer = setTimeout(() => {
     dismissPreloader();
   }, duration);
