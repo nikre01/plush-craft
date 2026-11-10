@@ -748,27 +748,28 @@ h1, h2, h3, h4, h5 {
   margin-bottom: 40px;
 }
 
-/* Aesthetic Brush / Pill CTA for Instagram */
+/* Harmonized Terracotta CTA for Instagram */
 .btn-insta-brush {
   background: var(--color-brand-rose);
   color: #FFFFFF !important;
   padding: 12px 24px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 0.92rem;
-  box-shadow: 0 4px 14px rgba(168, 82, 68, 0.25);
-  border: 1.5px dashed rgba(255, 255, 255, 0.45);
+  font-size: 0.88rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid transparent;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   text-decoration: none;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 
 .btn-insta-brush:hover {
   background: var(--color-brand-rose-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(168, 82, 68, 0.35);
+  box-shadow: var(--shadow-hover);
 }
 
 .hero-metrics {
