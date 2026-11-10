@@ -988,6 +988,113 @@ h1, h2, h3, h4, h5 {
   line-height: 1.65;
 }
 
+/* Live Store Search & Discovery */
+.store-search-container {
+  max-width: 680px;
+  margin: 0 auto 32px;
+}
+
+.store-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: #FFFFFF;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 6px 18px;
+  box-shadow: 0 4px 14px rgba(46, 39, 36, 0.06);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.store-search-box:focus-within {
+  border-color: var(--color-brand-rose);
+  box-shadow: 0 0 0 4px rgba(168, 82, 68, 0.12), 0 4px 14px rgba(46, 39, 36, 0.08);
+}
+
+.search-icon {
+  color: var(--color-ink-muted);
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.store-search-input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  padding: 8px 0;
+}
+
+.store-search-clear {
+  background: #F2ECE1;
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--color-ink);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.search-suggestion-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 0 4px;
+}
+
+.pill-chip {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-size: 0.76rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pill-chip:hover {
+  background: var(--color-brand-rose-tint);
+  border-color: var(--color-brand-rose);
+  color: var(--color-brand-rose);
+  transform: translateY(-1px);
+}
+
+.search-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  margin-top: 12px;
+  background: var(--color-surface-soft);
+  border-radius: var(--radius-sm);
+  font-size: 0.84rem;
+  color: var(--color-ink);
+}
+
+.btn-text-clear {
+  background: transparent;
+  border: none;
+  color: var(--color-brand-rose);
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 /* Category Filter Tabs */
 .filter-bar {
   display: flex;

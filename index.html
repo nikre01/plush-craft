@@ -49,6 +49,14 @@
 
       <!-- Utility Actions -->
       <div class="nav-utilities">
+        <!-- Search Trigger -->
+        <button class="btn-icon" onclick="applySearchQuery(''); setTimeout(() => { const el = document.getElementById('storeSearchInput'); if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }, 200);" title="Search Products" aria-label="Search Products">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
         <!-- Clean Instagram Icon Button -->
         <a href="https://www.instagram.com/plush_crafts.in/#" target="_blank" rel="noopener noreferrer" class="btn-icon nav-insta-btn" title="Follow @plush_crafts.in on Instagram" aria-label="Follow us on Instagram">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -236,20 +244,68 @@
         <span class="spaced-caps section-label">Our Collection</span>
         <h2 class="section-title">✦ Pipe Cleaner & Handmade Flowers ✦</h2>
         <p class="section-desc">
-          Real photos straight from our Instagram @plush_crafts.in. Order directly or get them customized in your favorite colors.
+          Browse our complete handcrafted catalog with 70+ authentic designs. Use the instant search to find your favorite colors and flowers!
         </p>
+      </div>
+
+      <!-- Live E-Commerce Search & Discovery Bar -->
+      <div class="store-search-container">
+        <div class="store-search-box">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input 
+            type="text" 
+            id="storeSearchInput" 
+            class="store-search-input" 
+            placeholder="Search 70+ bouquets, roses, sunflowers, diyas, lamps, colors..." 
+            autocomplete="off"
+            oninput="handleStoreSearch(this.value)"
+          />
+          <button id="storeSearchClear" class="store-search-clear" onclick="clearStoreSearch()" aria-label="Clear Search" style="display: none;">✕</button>
+        </div>
+
+        <!-- Quick Suggestion Tag Pills -->
+        <div class="search-suggestion-pills">
+          <span style="font-size: 0.76rem; font-weight: 700; color: var(--color-ink-muted); margin-right: 4px;">Suggestions:</span>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('rose')">🌹 Roses</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('sunflower')">🌻 Sunflowers</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('tulip')">🌷 Tulips</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('diya')">🪔 Diya & Decor</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('lamp')">💡 Glowing Lamps</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('pink')">💖 Pink</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('blue')">💙 Blue</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('spiderman')">🕷️ Spider-Man</button>
+          <button type="button" class="pill-chip" onclick="applySearchQuery('keychain')">🔑 Keychains</button>
+        </div>
+
+        <!-- Live Search Status Banner -->
+        <div id="searchStatusRow" class="search-status-row" style="display: none;">
+          <span id="searchStatusText">Showing matching results</span>
+          <button type="button" class="btn-text-clear" onclick="clearStoreSearch()">Reset Search ↺</button>
+        </div>
       </div>
 
       <!-- Category Filters -->
       <div class="filter-bar">
-        <button class="filter-tab active" data-filter-key="all">All Items</button>
+        <button class="filter-tab active" data-filter-key="all">All Items (70+)</button>
         <button class="filter-tab" data-filter-key="bouquets">Floral Bouquets</button>
         <button class="filter-tab" data-filter-key="decor">Diya & Festive Decor</button>
+        <button class="filter-tab" data-filter-key="lamps">Glowing Lamps</button>
+        <button class="filter-tab" data-filter-key="accessories">Keychains & Charms</button>
       </div>
 
-      <!-- Products Grid (100% Real @plush_crafts.in Images) -->
+      <!-- Products Grid -->
       <div id="collectionGrid" class="collection-grid">
         <!-- Injected via app.js -->
+      </div>
+
+      <!-- Load More / View All Toggle (When browsing default view) -->
+      <div id="catalogLoadMoreContainer" style="text-align: center; margin-top: 36px;">
+        <button id="catalogLoadMoreBtn" class="btn btn-outline" onclick="toggleViewAllProducts()" style="padding: 12px 28px; font-size: 0.92rem;">
+          View All 70+ Handcrafted Products ↓
+        </button>
       </div>
     </div>
   </section>
@@ -665,6 +721,10 @@
     <a href="#collectionSection" class="mobile-bottom-item">
       <span class="mobile-bottom-icon">🌸</span>
       <span class="mobile-bottom-label">Bouquets</span>
+    </a>
+    <a href="#collectionSection" class="mobile-bottom-item" onclick="setTimeout(() => { const el = document.getElementById('storeSearchInput'); if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }, 200);">
+      <span class="mobile-bottom-icon">🔍</span>
+      <span class="mobile-bottom-label">Search</span>
     </a>
     <a href="#atelierSection" class="mobile-bottom-item">
       <span class="mobile-bottom-icon">✨</span>
