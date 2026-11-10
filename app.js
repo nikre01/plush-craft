@@ -9,7 +9,7 @@ const PLUSH_WHATSAPP_NUMBER = '918989060207'; // WhatsApp: +91 89890 60207
 const PLUSH_INSTAGRAM_URL = 'https://www.instagram.com/plush_crafts.in/#';
 
 // --- Real Handcrafted Products from @plush_crafts.in ---
-const PRODUCTS = [
+const DEFAULT_PRODUCTS = [
   {
     id: 'pc-01',
     name: 'Handmade Blue Flower Bouquet',
@@ -146,6 +146,24 @@ const PRODUCTS = [
     provenance: '@plush_crafts.in'
   }
 ];
+
+// --- Persistent Catalog Sync with Private Admin Atelier ---
+function getActiveProducts() {
+  try {
+    const custom = localStorage.getItem('plush_catalog_products');
+    if (custom) {
+      const parsed = JSON.parse(custom);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('Using default catalog:', err);
+  }
+  return DEFAULT_PRODUCTS;
+}
+
+let PRODUCTS = getActiveProducts();
 
 // --- Instagram Feed Posts from @plush_crafts.in ---
 const INSTA_POSTS = [
@@ -670,6 +688,8 @@ function completeOrderViaWhatsApp() {
 
   const summary = cart.map(i => `• ${i.name} (Qty: ${i.quantity}) - ₹ ${(i.price * i.quantity).toLocaleString('en-IN')}`).join('\n');
 
+  logCustomerInquiry('WhatsApp Bag Order', '', 'Shopping Bag Checkout Lead', summary + `\nTotal: ₹ ${finalTotal}`);
+
   const text = 
 `Hello Plush Crafts! 🌸
 I would like to place an order from your website:
@@ -688,6 +708,8 @@ Please share UPI details for payment. Thank you! ♡`;
 function orderProductViaWhatsApp(id) {
   const p = PRODUCTS.find(item => item.id === id);
   if (!p) return;
+
+  logCustomerInquiry('Direct Product Inquiry', '', `Direct order click for ${p.name}`, `Price: ₹ ${p.price}`);
 
   const text = 
 `Hello Plush Crafts! 🌸
@@ -830,6 +852,51 @@ function scrollToAnchor(id) {
   }
 }
 
+// --- Private Admin Atelier Integrations (Hidden from Visitors) ---
+function logCustomerInquiry(name, phone, message, itemsSummary) {
+  try {
+    const list = JSON.parse(localStorage.getItem('plush_inquiries_log') || '[]');
+    list.unshift({
+      id: 'inq-' + Date.now(),
+      name: name || 'Guest Customer',
+      phone: phone || '',
+      message: message || '',
+      itemsSummary: itemsSummary || '',
+      date: new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+    });
+    localStorage.setItem('plush_inquiries_log', JSON.stringify(list.slice(0, 50)));
+  } catch (err) {
+    console.warn('Inquiry log error:', err);
+  }
+}
+
+function submitCustomInquiry(e) {
+  if (e) e.preventDefault();
+  const nameInput = document.querySelector('input[placeholder*="Diya"]');
+  const phoneInput = document.querySelector('input[placeholder*="handle"]');
+  const msgInput = document.querySelector('.form-control-textarea');
+
+  const name = nameInput ? nameInput.value.trim() : 'Guest Customer';
+  const phone = phoneInput ? phoneInput.value.trim() : '';
+  const requirements = msgInput ? msgInput.value.trim() : '';
+
+  logCustomerInquiry(name, phone, requirements, 'Special Custom Requirement Form');
+
+  const text = `Hello Plush Crafts (@plush_crafts.in)! 🌸\n\nI have a custom inquiry from your website:\n• Name: ${name}\n• Contact: ${phone}\n• Requirements: ${requirements}\n\nPlease let me know pricing & details. Thank you! ♡`;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text);
+  }
+
+  alert(`Thank you, ${name}! Your inquiry has been recorded and copied to clipboard.\nOpening Instagram DM now.`);
+  
+  if (nameInput) nameInput.value = '';
+  if (phoneInput) phoneInput.value = '';
+  if (msgInput) msgInput.value = '';
+
+  window.open('https://www.instagram.com/plush_crafts.in/#', '_blank');
+}
+
 function bindGlobalEvents() {
   const tabs = document.querySelectorAll('.filter-tab');
   tabs.forEach(tab => {
@@ -861,5 +928,32 @@ function bindGlobalEvents() {
       closeProductDetail();
       closeMobileMenu();
     }
+
+    // 🔒 Secret Admin Shortcut: Ctrl + Shift + A (Invisible to Visitors)
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+      e.preventDefault();
+      window.location.href = 'admin.html';
+    }
   });
+
+  // 🔒 Secret Admin Easter Egg: Triple-clicking "PLUSH" in Footer opens Admin
+  const footerBrand = document.querySelector('.footer-title-plush');
+  if (footerBrand) {
+    let clickCount = 0;
+    let clickTimer = null;
+    footerBrand.addEventListener('click', () => {
+      clickCount++;
+      if (clickTimer) clearTimeout(clickTimer);
+      if (clickCount >= 3) {
+        window.location.href = 'admin.html';
+      } else {
+        clickTimer = setTimeout(() => { clickCount = 0; }, 800);
+      }
+    });
+  }
+
+  // Check URL hash for secret `#admin` trigger
+  if (window.location.hash === '#admin') {
+    window.location.href = 'admin.html';
+  }
 }

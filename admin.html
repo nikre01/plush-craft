@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔒 Plush Atelier — Private Admin Portal</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <link rel="icon" href="assets/images/plush_official_logo.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Caveat:wght@600&display=swap">
+  <style>
+    :root {
+      --canvas: #F8F5EE;
+      --surface: #FFFFFF;
+      --surface-soft: #F2ECE1;
+      --border: #E5DCD3;
+      --ink: #2E2724;
+      --ink-muted: #786E66;
+      --brand-rose: #A85244;
+      --brand-rose-hover: #8F3F32;
+      --green: #25D366;
+      --green-dark: #1EBE5D;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --shadow-sm: 0 1px 3px rgba(46, 39, 36, 0.08);
+      --shadow-card: 0 4px 14px rgba(46, 39, 36, 0.08);
+      --shadow-float: 0 12px 28px rgba(46, 39, 36, 0.14);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: var(--canvas);
+      color: var(--ink);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- PIN AUTH OVERLAY --- */
+    #authOverlay {
+      position: fixed;
+      inset: 0;
+      background-color: var(--canvas);
+      z-index: 99999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 36px 32px;
+      max-width: 380px;
+      width: 100%;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .auth-logo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      object-fit: cover;
+      margin-bottom: 14px;
+    }
+
+    .auth-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    .auth-subtitle {
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      margin-bottom: 24px;
+    }
+
+    .pin-input {
+      width: 100%;
+      padding: 14px;
+      font-size: 1.5rem;
+      letter-spacing: 0.35em;
+      text-align: center;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+      outline: none;
+      font-family: inherit;
+      color: var(--ink);
+      background-color: #FAFAFA;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .pin-input:focus {
+      border-color: var(--brand-rose);
+      box-shadow: 0 0 0 3px rgba(168, 82, 68, 0.12);
+      background-color: #FFFFFF;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 20px;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background-color: var(--ink);
+      color: #FFFFFF;
+      width: 100%;
+    }
+
+    .btn-primary:hover {
+      background-color: #1F1A17;
+    }
+
+    .btn-rose {
+      background-color: var(--brand-rose);
+      color: #FFFFFF;
+    }
+
+    .btn-rose:hover {
+      background-color: var(--brand-rose-hover);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid var(--border);
+      color: var(--ink);
+    }
+
+    .btn-outline:hover {
+      background-color: var(--surface-soft);
+      border-color: var(--ink-muted);
+    }
+
+    .btn-danger {
+      background-color: #FEE2E2;
+      color: #DC2626;
+      border: 1px solid #FCA5A5;
+    }
+
+    .btn-danger:hover {
+      background-color: #F87171;
+      color: #FFFFFF;
+    }
+
+    .auth-error {
+      color: #DC2626;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* --- ADMIN APP LAYOUT --- */
+    .admin-app {
+      display: none; /* revealed on unlock */
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .admin-nav-bar {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .admin-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--ink);
+    }
+
+    .admin-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+
+    .admin-title-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .admin-badge {
+      background-color: #FEF3C7;
+      color: #92400E;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #FDE68A;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* --- MAIN CONTENT & TABS --- */
+    .admin-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+      width: 100%;
+      flex-grow: 1;
+    }
+
+    .tab-navigation {
+      display: flex;
+      gap: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tab-navigation::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      padding: 10px 18px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      cursor: pointer;
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.2s;
+    }
+
+    .tab-btn:hover { color: var(--ink); }
+
+    .tab-btn.active {
+      color: var(--brand-rose);
+    }
+
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background-color: var(--brand-rose);
+      border-radius: 2px 2px 0 0;
+    }
+
+    /* --- METRICS ROW --- */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .metric-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .metric-card-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--ink-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .metric-card-value {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    /* --- PRODUCTS TAB --- */
+    .panel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .products-table-wrapper {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table.admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+
+    table.admin-table th {
+      background-color: var(--surface-soft);
+      padding: 12px 16px;
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    table.admin-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    table.admin-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    table.admin-table tr:hover {
+      background-color: #FAFAFA;
+    }
+
+    .prod-thumb-cell {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-xs);
+      border: 1px solid var(--border);
+      object-fit: cover;
+      display: block;
+    }
+
+    .badge-tag {
+      display: inline-block;
+      padding: 2px 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border-radius: 4px;
+      background: #EFF6FF;
+      color: #1D4ED8;
+      border: 1px solid #BFDBFE;
+    }
+
+    /* --- INQUIRIES & ORDERS TAB --- */
+    .inquiry-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .inquiry-info strong {
+      font-size: 1rem;
+      color: var(--ink);
+    }
+
+    .inquiry-meta {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      margin: 4px 0 8px;
+    }
+
+    .inquiry-text {
+      background: var(--surface-soft);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.86rem;
+      color: var(--ink);
+      max-width: 600px;
+    }
+
+    /* --- MODALS --- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(46, 39, 36, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      max-width: 580px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px;
+      box-shadow: var(--shadow-float);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xs);
+      font-family: inherit;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--brand-rose);
+      box-shadow: 0 0 0 3px rgba(168, 82, 68, 0.12);
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 640px) {
+      .form-grid-2 { grid-template-columns: 1fr; }
+      .metrics-row { grid-template-columns: 1fr; }
+      .inquiry-card { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================
+       1. PRIVATE AUTH LOCK SCREEN (Invisible until unlocked)
+       ======================================================== -->
+  <div id="authOverlay">
+    <div class="auth-card">
+      <img src="assets/images/plush_official_logo.png" alt="Plush Crafts" class="auth-logo" />
+      <h1 class="auth-title">Plush Atelier</h1>
+      <p class="auth-subtitle">Private Business Administration Portal</p>
+
+      <form id="authForm" onsubmit="handleAuth(event)">
+        <input 
+          type="password" 
+          id="pinInput" 
+          class="pin-input" 
+          placeholder="••••" 
+          maxlength="6" 
+          autofocus 
+          required 
+          autocomplete="off"
+        />
+        <button type="submit" class="btn btn-primary">
+          Unlock Atelier Portal
+        </button>
+        <div id="authErrorMsg" class="auth-error">Incorrect PIN. Please try again.</div>
+      </form>
+      <div style="margin-top: 18px; font-size: 0.75rem; color: var(--ink-muted);">
+        Default PIN: <strong>8989</strong> (Changeable inside settings)
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       2. ADMIN PORTAL (Visible ONLY after successful PIN)
+       ======================================================== -->
+  <div id="adminApp" class="admin-app">
+    
+    <!-- Top Header Navigation -->
+    <header class="admin-header">
+      <div class="admin-nav-bar">
+        <a href="index.html" class="admin-brand" target="_blank" title="Preview Public Storefront">
+          <img src="assets/images/plush_official_logo.png" alt="Plush Logo" />
+          <div>
+            <div class="admin-title-badge">
+              <strong style="font-size: 1.15rem; font-weight: 800;">PLUSH</strong>
+              <span class="admin-badge">Admin Atelier</span>
+            </div>
+            <span style="font-size: 0.72rem; color: var(--ink-muted);">@plush_crafts.in Portal</span>
+          </div>
+        </a>
+
+        <div class="admin-actions">
+          <a href="index.html" target="_blank" class="btn btn-outline" style="font-size: 0.8rem; padding: 8px 14px;">
+            👁 View Website
+          </a>
+          <button class="btn btn-outline" onclick="exportCatalogSnippet()" style="font-size: 0.8rem; padding: 8px 14px;">
+            💾 Export Code
+          </button>
+          <button class="btn btn-danger" onclick="adminLogout()" style="font-size: 0.8rem; padding: 8px 14px;">
+            Lock / Exit
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="admin-main">
+      
+      <!-- Top Metrics Summary -->
+      <div class="metrics-row">
+        <div class="metric-card">
+          <div class="metric-card-label">Active Products</div>
+          <div id="statTotalProducts" class="metric-card-value">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Logged Inquiries & Orders</div>
+          <div id="statTotalInquiries" class="metric-card-value">0</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-card-label">Active Promo Code</div>
+          <div class="metric-card-value" style="font-size: 1.4rem; color: var(--brand-rose);">PLUSH10 (10%)</div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="tab-navigation">
+        <button class="tab-btn active" onclick="switchTab('productsTab', this)">🌸 Manage Products</button>
+        <button class="tab-btn" onclick="switchTab('inquiriesTab', this)">📩 Orders & Inquiries Inbox</button>
+        <button class="tab-btn" onclick="switchTab('discountsTab', this)">🎟️ Discounts & Coupons</button>
+        <button class="tab-btn" onclick="switchTab('settingsTab', this)">⚙️ Settings & PIN</button>
+      </nav>
+
+      <!-- TAB 1: PRODUCTS MANAGEMENT -->
+      <section id="productsTab" class="tab-panel">
+        <div class="panel-header-row">
+          <div>
+            <h2 class="panel-title">Product Catalog</h2>
+            <p style="font-size: 0.82rem; color: var(--ink-muted);">Add, edit prices, update images, or remove bouquets from your live store.</p>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn btn-outline" onclick="resetToDefaultCatalog()">↺ Reset to Defaults</button>
+            <button class="btn btn-rose" onclick="openAddProductModal()">+ Add New Product</button>
+          </div>
+        </div>
+
+        <div class="products-table-wrapper">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Original</th>
+                <th>Badge</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="productsTableBody">
+              <!-- Rendered via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 2: INQUIRIES & ORDERS INBOX -->
+      <section id="inquiriesTab" class="tab-panel" style="display: none;">
+        <div class="panel-header-row">
+          <div>
+            <h2 class="panel-title">Customer Inquiries & Order Requests</h2>
+            <p style="font-size: 0.82rem; color: var(--ink-muted);">Messages and order requests submitted through your website.</p>
+          </div>
+          <button class="btn btn-outline" onclick="clearInquiriesLog()">Clear Inbox</button>
+        </div>
+
+        <div id="inquiriesContainer">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+
+      <!-- TAB 3: DISCOUNTS & COUPONS -->
+      <section id="discountsTab" class="tab-panel" style="display: none;">
+        <div class="panel-header-row">
+          <div>
+            <h2 class="panel-title">Active Discount Codes</h2>
+            <p style="font-size: 0.82rem; color: var(--ink-muted);">Coupon codes customers can apply in their shopping bag.</p>
+          </div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; max-width: 600px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--surface-soft); border-radius: 6px; margin-bottom: 16px;">
+            <div>
+              <strong style="font-size: 1.1rem; color: var(--brand-rose);">PLUSH10</strong>
+              <div style="font-size: 0.8rem; color: var(--ink-muted);">10% Flat Discount on all bouquets</div>
+            </div>
+            <span class="badge-tag" style="background: #DCFCE7; color: #166534; border-color: #BBF7D0;">Active</span>
+          </div>
+          <p style="font-size: 0.85rem; color: var(--ink-muted);">Customers can enter this code in the shopping bag drawer to get an instant 10% discount on order calculation.</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: SETTINGS & SECURITY PIN -->
+      <section id="settingsTab" class="tab-panel" style="display: none;">
+        <div class="panel-header-row">
+          <div>
+            <h2 class="panel-title">Security & Atelier Settings</h2>
+            <p style="font-size: 0.82rem; color: var(--ink-muted);">Change your private Admin access PIN code.</p>
+          </div>
+        </div>
+
+        <div style="background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; max-width: 480px;">
+          <form onsubmit="changeAdminPin(event)">
+            <div class="form-group">
+              <label>Current Security PIN</label>
+              <input type="password" id="currPin" class="form-input" required maxlength="6" placeholder="Current PIN (default 8989)" />
+            </div>
+            <div class="form-group">
+              <label>New Security PIN</label>
+              <input type="password" id="newPin" class="form-input" required maxlength="6" placeholder="Enter new 4-6 digit PIN" />
+            </div>
+            <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+              Update Security PIN
+            </button>
+            <div id="pinSuccessMsg" style="color: #16A34A; font-size: 0.82rem; font-weight: 600; margin-top: 10px; display: none;">
+              ✓ PIN updated successfully!
+            </div>
+          </form>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================
+       3. ADD / EDIT PRODUCT MODAL
+       ======================================================== -->
+  <div id="productModalBackdrop" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalTitle" style="font-size: 1.2rem; font-weight: 800;">Add New Product</h3>
+        <button onclick="closeProductModal()" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer;">✕</button>
+      </div>
+
+      <form id="productForm" onsubmit="saveProduct(event)">
+        <input type="hidden" id="editProductId" />
+
+        <div class="form-group">
+          <label>Product Name *</label>
+          <input type="text" id="prodName" class="form-input" required placeholder="e.g. Handmade Sunflower Bouquet" />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Category *</label>
+            <select id="prodCategory" class="form-input" required>
+              <option value="bouquets">Floral Bouquets</option>
+              <option value="decor">Diya & Festive Decor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Badge / Tag</label>
+            <input type="text" id="prodBadge" class="form-input" placeholder="e.g. Best Seller / Popular" />
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Selling Price (₹) *</label>
+            <input type="number" id="prodPrice" class="form-input" required min="1" placeholder="699" />
+          </div>
+          <div class="form-group">
+            <label>Original Price (₹) *</label>
+            <input type="number" id="prodOrigPrice" class="form-input" required min="1" placeholder="899" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Image File Path or URL *</label>
+          <input type="text" id="prodImage" class="form-input" required placeholder="assets/images/insta_post_1.jpg" />
+          <span style="font-size: 0.72rem; color: var(--ink-muted);">Use existing asset paths (e.g. `assets/images/insta_post_1.jpg`) or an external image link.</span>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label>Crafting Time</label>
+            <input type="text" id="prodCraftTime" class="form-input" placeholder="e.g. 4 Hours of Handcrafting" />
+          </div>
+          <div class="form-group">
+            <label>Dimensions / Size</label>
+            <input type="text" id="prodDimensions" class="form-input" placeholder="e.g. 30 cm Stem Length" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Short Summary</label>
+          <input type="text" id="prodSummary" class="form-input" placeholder="Short description for preview cards..." />
+        </div>
+
+        <div class="form-group">
+          <label>Full Description</label>
+          <textarea id="prodDesc" rows="3" class="form-input" style="resize: vertical;" placeholder="Detailed handcrafted description..."></textarea>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-outline" onclick="closeProductModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Product</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Code Snippet Export Modal -->
+  <div id="exportModalBackdrop" class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 style="font-size: 1.2rem; font-weight: 800;">Export Catalog Code</h3>
+        <button onclick="document.getElementById('exportModalBackdrop').classList.remove('active')" style="background: transparent; border: none; font-size: 1.3rem; cursor: pointer;">✕</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 12px;">
+        Copy this JSON data or updated PRODUCTS array to paste into your code whenever you want to permanently commit new products to GitHub:
+      </p>
+      <textarea id="exportCodeArea" rows="12" class="form-input" style="font-family: monospace; font-size: 0.8rem; resize: vertical;" readonly></textarea>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+        <button class="btn btn-outline" onclick="navigator.clipboard.writeText(document.getElementById('exportCodeArea').value); alert('Copied to clipboard!');">
+          📋 Copy to Clipboard
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin JavaScript Logic -->
+  <script>
+    const DEFAULT_PIN = '8989';
+    const PIN_KEY = 'plush_admin_pin';
+    const AUTH_SESSION_KEY = 'plush_admin_session';
+    const CATALOG_KEY = 'plush_catalog_products';
+    const INQUIRIES_KEY = 'plush_inquiries_log';
+
+    // Initial 9 authentic items from @plush_crafts.in
+    const FALLBACK_PRODUCTS = [
+      {
+        id: 'pc-01',
+        name: 'Handmade Blue Flower Bouquet',
+        category: 'bouquets',
+        price: 699,
+        originalPrice: 899,
+        badge: 'Popular',
+        craftTime: '4.5 Hours of Handcrafting',
+        dimensions: '28 cm Length',
+        material: 'Premium Soft Cotton & Archival Paper Wrap',
+        shortSummary: 'Hand-crocheted blue floral bouquet tied with natural jute twine.',
+        fullDescription: 'One of our most popular bouquets! Each petal is crocheted by hand with soft cotton yarn. Features vibrant blue blossoms with delicate white accents.',
+        image: 'assets/images/insta_post_1.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-02',
+        name: 'Pastel Lavender Flower Bouquet',
+        category: 'bouquets',
+        price: 749,
+        originalPrice: 949,
+        badge: 'Best Seller',
+        craftTime: '5 Hours of Handcrafting',
+        dimensions: '30 cm Length',
+        material: 'Soft Combed Cotton & Natural Ribbon',
+        shortSummary: 'Pastel purple and lilac blossoms crafted stitch-by-stitch.',
+        fullDescription: 'Soft lavender and lilac hues handcrafted with love. A forever flower bouquet that never withers or loses its beauty.',
+        image: 'assets/images/insta_post_2.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-03',
+        name: 'Kraft Paper Wrapped Flower Bouquet',
+        category: 'bouquets',
+        price: 799,
+        originalPrice: 999,
+        badge: 'Featured',
+        craftTime: '5.5 Hours of Handcrafting',
+        dimensions: '32 cm Stem Length',
+        material: '100% Cotton Yarn & Rustic Kraft Wrap',
+        shortSummary: 'Handmade mixed floral bouquet wrapped in aesthetic kraft paper with ribbon.',
+        fullDescription: 'A complete handcrafted bouquet designed with mixed floral stems and finished with an elegant kraft wrap.',
+        image: 'assets/images/insta_post_3.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-04',
+        name: 'Festive Diya & Tea Light Holder (10 Colors)',
+        category: 'decor',
+        price: 499,
+        originalPrice: 650,
+        badge: '10 Colors Available',
+        craftTime: '3 Hours of Handcrafting',
+        dimensions: '12 cm Diameter',
+        material: 'Handcrafted Fiber, Pearl Beads & Base',
+        shortSummary: 'Festive tea light candle holder crafted across ten distinct shades with pearl embellishments.',
+        fullDescription: 'Handmade tea light holder ringed with delicate pearls and vibrant handcrafted petals to brighten your home.',
+        image: 'assets/images/insta_post_5.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-05',
+        name: 'Lotus Pearl Candle Holder',
+        category: 'decor',
+        price: 549,
+        originalPrice: 699,
+        badge: 'Festive Decor',
+        craftTime: '3.5 Hours of Handcrafting',
+        dimensions: '14 cm Diameter',
+        material: 'Hand-Stitched Petals & Luster Pearls',
+        shortSummary: 'Lotus style tea light holder with pearl adornments and gift packaging.',
+        fullDescription: 'Handcrafted lotus petal tea light holder embellished with pearls. Perfect centerpiece for Diwali or puja.',
+        image: 'assets/images/insta_post_4.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-06',
+        name: 'Happy Birthday Flower Bouquet',
+        category: 'bouquets',
+        price: 849,
+        originalPrice: 1099,
+        badge: 'Birthday Special',
+        craftTime: '5.5 Hours of Handcrafting',
+        dimensions: '30 cm Length',
+        material: 'Soft Cotton & Keepsake Card',
+        shortSummary: 'Handcrafted floral bouquet paired with a handwritten "Happy Birthday!" card.',
+        fullDescription: 'A cheerful handmade arrangement of pink, lilac, and blue blossoms with lush green stems.',
+        image: 'assets/images/insta_post_7.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-07',
+        name: 'Ganpati Bappa Red Flower Haar',
+        category: 'decor',
+        price: 599,
+        originalPrice: 799,
+        badge: 'Festive Garland',
+        craftTime: '4 Hours of Handcrafting',
+        dimensions: '45 cm Loop',
+        material: 'Vibrant Red Fuzzy Chenille & Pearls',
+        shortSummary: 'Handmade auspicious red flower haar for puja, Ganpati, and festive altars.',
+        fullDescription: 'Sacred red flower garland with pearl highlights. Crafted for festive blessings, car dashboard, and home temples.',
+        image: 'assets/images/insta_post_11.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-08',
+        name: 'Spider-Man Theme Pipe Cleaner Bouquet',
+        category: 'bouquets',
+        price: 799,
+        originalPrice: 999,
+        badge: 'Special Edition',
+        craftTime: '6 Hours of Handcrafting',
+        dimensions: '30 cm Length',
+        material: 'Velvet Chenille Stems & Ribbon',
+        shortSummary: 'Signature Spider-Man themed red and blue floral bouquet with web accents.',
+        fullDescription: 'Our viral signature Spider-Man theme bouquet! Handcrafted with red and royal blue fuzzy pipe cleaner stems.',
+        image: 'assets/images/spiderman_bouquet.jpg',
+        provenance: '@plush_crafts.in'
+      },
+      {
+        id: 'pc-09',
+        name: 'Glowing LED Pipe Cleaner Flower Night Lamp',
+        category: 'decor',
+        price: 899,
+        originalPrice: 1199,
+        badge: 'Night Lamp',
+        craftTime: '5.5 Hours of Handcrafting',
+        dimensions: '22 cm Height Glass Dome',
+        material: 'Handmade Blossoms, Warm LED Fairy Lights',
+        shortSummary: 'Magical warm glowing flower dome night lamp for bedside or gifts.',
+        fullDescription: 'An enchanting handcrafted flower lamp that illuminates any room with gentle warm fairy lights.',
+        image: 'assets/images/glowing_flower_lamp.jpg',
+        provenance: '@plush_crafts.in'
+      }
+    ];
+
+    let currentProducts = [];
+
+    // --- Auth Verification ---
+    function checkAuth() {
+      const isAuth = sessionStorage.getItem(AUTH_SESSION_KEY) === 'true';
+      if (isAuth) {
+        document.getElementById('authOverlay').style.display = 'none';
+        document.getElementById('adminApp').style.display = 'flex';
+        loadAdminData();
+      } else {
+        document.getElementById('authOverlay').style.display = 'flex';
+        document.getElementById('adminApp').style.display = 'none';
+        setTimeout(() => document.getElementById('pinInput').focus(), 100);
+      }
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const enteredPin = document.getElementById('pinInput').value.trim();
+      const currentPin = localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+      const errorMsg = document.getElementById('authErrorMsg');
+
+      if (enteredPin === currentPin) {
+        sessionStorage.setItem(AUTH_SESSION_KEY, 'true');
+        errorMsg.style.display = 'none';
+        checkAuth();
+      } else {
+        errorMsg.style.display = 'block';
+        document.getElementById('pinInput').value = '';
+        document.getElementById('pinInput').focus();
+      }
+    }
+
+    function adminLogout() {
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+      location.reload();
+    }
+
+    // --- Data Loaders & Renderers ---
+    function loadAdminData() {
+      // Load products
+      const stored = localStorage.getItem(CATALOG_KEY);
+      if (stored) {
+        try {
+          currentProducts = JSON.parse(stored);
+        } catch {
+          currentProducts = [...FALLBACK_PRODUCTS];
+        }
+      } else {
+        currentProducts = [...FALLBACK_PRODUCTS];
+        localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+      }
+
+      renderProductsTable();
+      renderInquiries();
+      updateMetrics();
+    }
+
+    function updateMetrics() {
+      document.getElementById('statTotalProducts').textContent = currentProducts.length;
+      
+      const inquiries = JSON.parse(localStorage.getItem(INQUIRIES_KEY) || '[]');
+      document.getElementById('statTotalInquiries').textContent = inquiries.length;
+    }
+
+    function renderProductsTable() {
+      const tbody = document.getElementById('productsTableBody');
+      if (!tbody) return;
+
+      tbody.innerHTML = currentProducts.map((p, idx) => `
+        <tr>
+          <td>
+            <img src="${p.image}" alt="${p.name}" class="prod-thumb-cell" onerror="this.src='assets/images/plush_official_logo.png'" />
+          </td>
+          <td>
+            <strong>${p.name}</strong>
+            <div style="font-size: 0.75rem; color: var(--ink-muted);">${p.id}</div>
+          </td>
+          <td>
+            <span style="text-transform: capitalize;">${p.category}</span>
+          </td>
+          <td>
+            <strong style="color: var(--brand-rose);">₹ ${p.price}</strong>
+          </td>
+          <td>
+            <span style="color: var(--ink-muted); text-decoration: line-through;">₹ ${p.originalPrice}</span>
+          </td>
+          <td>
+            <span class="badge-tag">${p.badge || 'Active'}</span>
+          </td>
+          <td>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-outline" style="padding: 4px 10px; font-size: 0.78rem;" onclick="openEditProductModal('${p.id}')">Edit</button>
+              <button class="btn btn-danger" style="padding: 4px 10px; font-size: 0.78rem;" onclick="deleteProduct('${p.id}')">Delete</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderInquiries() {
+      const container = document.getElementById('inquiriesContainer');
+      const inquiries = JSON.parse(localStorage.getItem(INQUIRIES_KEY) || '[]');
+
+      if (inquiries.length === 0) {
+        container.innerHTML = `
+          <div style="text-align: center; padding: 40px; background: #FFF; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--ink-muted);">
+            <div style="font-size: 2rem; margin-bottom: 8px;">📭</div>
+            <strong>No Inquiries Logged Yet</strong>
+            <p style="font-size: 0.82rem; margin-top: 4px;">When customers submit the inquiry form or place WhatsApp orders, their requests appear here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = inquiries.map((inq) => `
+        <div class="inquiry-card">
+          <div class="inquiry-info">
+            <strong>${inq.name || 'Anonymous Guest'}</strong>
+            <div class="inquiry-meta">
+              <span>📱 ${inq.phone || 'Not provided'}</span> • 
+              <span>🕒 ${inq.date || 'Recently'}</span>
+            </div>
+            <div class="inquiry-text">${inq.message || inq.itemsSummary || '(No custom message)'}</div>
+          </div>
+          <div>
+            ${inq.phone ? `
+              <a href="https://wa.me/${inq.phone.replace(/[^0-9]/g, '')}?text=Hello%20${encodeURIComponent(inq.name || '')}!%20🌸%20Following%20up%20from%20Plush%20Crafts." target="_blank" class="btn btn-primary" style="font-size: 0.8rem; padding: 6px 12px; background: #25D366; border-color: #25D366;">
+                Chat on WhatsApp
+              </a>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function clearInquiriesLog() {
+      if (confirm('Are you sure you want to clear all inquiries?')) {
+        localStorage.removeItem(INQUIRIES_KEY);
+        renderInquiries();
+        updateMetrics();
+      }
+    }
+
+    // --- Product Add & Edit Handlers ---
+    function openAddProductModal() {
+      document.getElementById('modalTitle').textContent = 'Add New Product';
+      document.getElementById('productForm').reset();
+      document.getElementById('editProductId').value = '';
+      document.getElementById('productModalBackdrop').classList.add('active');
+    }
+
+    function openEditProductModal(id) {
+      const p = currentProducts.find(item => item.id === id);
+      if (!p) return;
+
+      document.getElementById('modalTitle').textContent = 'Edit Product';
+      document.getElementById('editProductId').value = p.id;
+      document.getElementById('prodName').value = p.name;
+      document.getElementById('prodCategory').value = p.category;
+      document.getElementById('prodBadge').value = p.badge || '';
+      document.getElementById('prodPrice').value = p.price;
+      document.getElementById('prodOrigPrice').value = p.originalPrice;
+      document.getElementById('prodImage').value = p.image;
+      document.getElementById('prodCraftTime').value = p.craftTime || '';
+      document.getElementById('prodDimensions').value = p.dimensions || '';
+      document.getElementById('prodSummary').value = p.shortSummary || '';
+      document.getElementById('prodDesc').value = p.fullDescription || '';
+
+      document.getElementById('productModalBackdrop').classList.add('active');
+    }
+
+    function closeProductModal() {
+      document.getElementById('productModalBackdrop').classList.remove('active');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const editId = document.getElementById('editProductId').value;
+
+      const productData = {
+        id: editId || 'pc-' + Date.now().toString().slice(-4),
+        name: document.getElementById('prodName').value.trim(),
+        category: document.getElementById('prodCategory').value,
+        price: parseInt(document.getElementById('prodPrice').value, 10),
+        originalPrice: parseInt(document.getElementById('prodOrigPrice').value, 10),
+        badge: document.getElementById('prodBadge').value.trim() || 'Handmade',
+        craftTime: document.getElementById('prodCraftTime').value.trim() || '4 Hours of Crafting',
+        dimensions: document.getElementById('prodDimensions').value.trim() || 'Standard Bouquet',
+        material: 'Premium Pipe Cleaners & Cotton Yarn',
+        shortSummary: document.getElementById('prodSummary').value.trim(),
+        fullDescription: document.getElementById('prodDesc').value.trim(),
+        image: document.getElementById('prodImage').value.trim(),
+        provenance: '@plush_crafts.in'
+      };
+
+      if (editId) {
+        const index = currentProducts.findIndex(p => p.id === editId);
+        if (index !== -1) currentProducts[index] = productData;
+      } else {
+        currentProducts.unshift(productData);
+      }
+
+      localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+      closeProductModal();
+      renderProductsTable();
+      updateMetrics();
+      alert('Product saved successfully! It is now live on your website.');
+    }
+
+    function deleteProduct(id) {
+      if (confirm('Are you sure you want to delete this product from your store?')) {
+        currentProducts = currentProducts.filter(p => p.id !== id);
+        localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+        renderProductsTable();
+        updateMetrics();
+      }
+    }
+
+    function resetToDefaultCatalog() {
+      if (confirm('Reset your catalog to the original 9 @plush_crafts.in products?')) {
+        currentProducts = [...FALLBACK_PRODUCTS];
+        localStorage.setItem(CATALOG_KEY, JSON.stringify(currentProducts));
+        renderProductsTable();
+        updateMetrics();
+        alert('Catalog reset to initial 9 products.');
+      }
+    }
+
+    // --- Exporting Snippet for Code Permanence ---
+    function exportCatalogSnippet() {
+      const code = JSON.stringify(currentProducts, null, 2);
+      document.getElementById('exportCodeArea').value = `// Paste this updated array into app.js:\nconst PRODUCTS = ${code};`;
+      document.getElementById('exportModalBackdrop').classList.add('active');
+    }
+
+    // --- PIN Management ---
+    function changeAdminPin(e) {
+      e.preventDefault();
+      const curr = document.getElementById('currPin').value.trim();
+      const next = document.getElementById('newPin').value.trim();
+      const activePin = localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+
+      if (curr !== activePin) {
+        alert('Current PIN is incorrect!');
+        return;
+      }
+
+      if (next.length < 4) {
+        alert('New PIN must be at least 4 digits!');
+        return;
+      }
+
+      localStorage.setItem(PIN_KEY, next);
+      document.getElementById('currPin').value = '';
+      document.getElementById('newPin').value = '';
+      const msg = document.getElementById('pinSuccessMsg');
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+
+    // --- Tabs Switching ---
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      const target = document.getElementById(tabId);
+      if (target) target.style.display = 'block';
+      if (btn) btn.classList.add('active');
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', checkAuth);
+  </script>
+</body>
+</html>
