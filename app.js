@@ -1290,7 +1290,8 @@ const atelierState = {
     color: '#D32F2F'
   },
   embellishments: [
-    { id: 'kraft-wrap', name: 'Kraft Paper & Jute Ribbon', price: 60 }
+    { id: 'kraft-wrap', name: 'Kraft Paper & Satin Ribbon', price: 60 },
+    { id: 'gift-card', name: 'Handwritten Dedication Card', price: 0 }
   ],
   dedication: 'Handmade with love ♡ from @plush_crafts.in'
 };
@@ -1560,6 +1561,23 @@ function initAtelierBuilder() {
   updateAtelierSummary();
 }
 
+function showToast(text) {
+  let toast = document.getElementById('plushToast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'plushToast';
+    toast.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:#2E2724;color:#FFFFFF;padding:12px 24px;border-radius:30px;font-size:0.86rem;font-weight:600;z-index:9999999;box-shadow:0 8px 24px rgba(0,0,0,0.28);border:1px solid rgba(255,255,255,0.15);transition:opacity 0.3s cubic-bezier(0.2,0.8,0.3,1),transform 0.3s cubic-bezier(0.2,0.8,0.3,1);opacity:0;pointer-events:none;text-align:center;max-width:90vw;';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = text;
+  toast.style.opacity = '1';
+  toast.style.transform = 'translateX(-50%) translateY(0)';
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 3200);
+}
+
 function updateAtelierSummary() {
   const modelNameEl = document.getElementById('slipModelName');
   const paletteNameEl = document.getElementById('slipPaletteName');
@@ -1575,9 +1593,12 @@ function updateAtelierSummary() {
     if (atelierState.embellishments.length === 0) {
       embellishListEl.innerHTML = `<span style="color: var(--color-ink-muted);">Standard Packaging</span>`;
     } else {
-      embellishListEl.innerHTML = atelierState.embellishments.map(e => `
-        <span style="display: block; font-size: 0.82rem; color: var(--color-ink-muted);">+ ${e.name} (₹ ${e.price})</span>
-      `).join('');
+      embellishListEl.innerHTML = atelierState.embellishments.map(e => {
+        if (e.price === 0) {
+          return `<span style="display: block; font-size: 0.82rem; color: var(--color-green); font-weight: 600;">✓ ${e.name} (Free Included ♡)</span>`;
+        }
+        return `<span style="display: block; font-size: 0.82rem; color: var(--color-ink-muted);">+ ${e.name} (₹ ${e.price})</span>`;
+      }).join('');
     }
   }
 
@@ -1653,11 +1674,10 @@ Please let me know how to confirm this order. Thank you! ♡`;
     navigator.clipboard.writeText(message);
   }
 
-  alert(
-    `Order message copied to clipboard!\n\nOpening @plush_crafts.in on Instagram now. Send us this message to complete your order!`
-  );
-
-  window.open('https://www.instagram.com/plush_crafts.in/#', '_blank');
+  showToast('✓ Order details copied! Opening Instagram DM...');
+  setTimeout(() => {
+    window.open('https://www.instagram.com/plush_crafts.in/#', '_blank');
+  }, 600);
 }
 
 // --- Cart Operations ---
@@ -1937,11 +1957,10 @@ Please share UPI details so I can make the payment. Thank you! ♡`;
     navigator.clipboard.writeText(text);
   }
 
-  alert(
-    `Order message copied to clipboard!\n\nOpening @plush_crafts.in on Instagram now. Send us this message to complete your order! ♡`
-  );
-
-  window.open('https://www.instagram.com/plush_crafts.in/#', '_blank');
+  showToast('✓ Bag order summary copied! Opening Instagram DM...');
+  setTimeout(() => {
+    window.open('https://www.instagram.com/plush_crafts.in/#', '_blank');
+  }, 600);
 }
 
 function openProductDetail(id) {
