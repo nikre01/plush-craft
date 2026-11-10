@@ -2621,3 +2621,81 @@ h1, h2, h3, h4, h5 {
     height: 150px !important;
   }
 }
+
+/* ===================================================================
+ * ORDER JOURNEY / SMALL BUSINESS TRANSPARENCY SECTION
+ * =================================================================== */
+.order-journey-section {
+  padding: 60px 0;
+  background-color: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.journey-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-top: 32px;
+}
+
+.journey-card {
+  background: var(--color-canvas);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 22px 18px;
+  position: relative;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.journey-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(46, 39, 36, 0.08);
+}
+
+.journey-step-tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--color-surface);
+  color: var(--color-red);
+  padding: 3px 10px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  margin-bottom: 12px;
+}
+
+.journey-emoji {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.journey-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 6px;
+}
+
+.journey-desc {
+  font-size: 0.85rem;
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .journey-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 520px) {
+  .journey-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
