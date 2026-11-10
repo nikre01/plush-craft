@@ -1,0 +1,73 @@
+<svg width="400" height="400" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&amp;family=Playfair+Display:ital,wght@1,600;1,700&amp;family=Plus+Jakarta+Sans:wght@700&amp;display=swap');
+      .brand-bow {
+        stroke: #3A312B;
+        stroke-width: 2.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        fill: none;
+      }
+      .brand-title {
+        font-family: 'Playfair Display', 'Caveat', serif;
+        font-size: 76px;
+        font-weight: 700;
+        font-style: italic;
+        fill: #322A25;
+        letter-spacing: 0.02em;
+        text-anchor: middle;
+      }
+      .brand-sub {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        fill: #4D433D;
+        letter-spacing: 0.46em;
+        text-anchor: middle;
+      }
+      .brand-tag {
+        font-family: 'Caveat', cursive;
+        font-size: 24px;
+        font-weight: 600;
+        fill: #61564F;
+        letter-spacing: 0.04em;
+        text-anchor: middle;
+      }
+    </style>
+    
+    <filter id="badgeShadow" x="-15%" y="-15%" width="130%" height="130%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="8" stdDeviation="14" flood-color="#2E2724" flood-opacity="0.12" />
+    </filter>
+  </defs>
+
+  <!-- 1. Round Medallion Base (Warm Kraft Ivory / Linen) -->
+  <circle cx="200" cy="200" r="186" fill="#FAF6F0" filter="url(#badgeShadow)" />
+
+  <!-- 2. Concentric Artisan Border Rings -->
+  <circle cx="200" cy="200" r="174" stroke="#DCD3C7" stroke-width="2.2" fill="none" />
+  <circle cx="200" cy="200" r="166" stroke="#ECE4DA" stroke-width="1.2" stroke-dasharray="4 4" fill="none" />
+
+  <!-- 3. Official Brand Tied Ribbon Bow Knot Emblem -->
+  <g id="ribbonBowEmblem">
+    <!-- Left Loop -->
+    <path class="brand-bow" d="M 196 112 C 178 95, 154 99, 152 115 C 150 129, 174 130, 196 115 Z" fill="#3A312B" fill-opacity="0.04" />
+    <!-- Right Loop -->
+    <path class="brand-bow" d="M 204 112 C 222 95, 246 99, 248 115 C 250 129, 226 130, 204 115 Z" fill="#3A312B" fill-opacity="0.04" />
+    <!-- Center Knot -->
+    <ellipse cx="200" cy="113" rx="4.5" ry="5.5" fill="#3A312B" stroke="#3A312B" stroke-width="0.8" />
+    <!-- Left Drapery Ribbon Tail -->
+    <path class="brand-bow" d="M 197 117 C 190 130, 178 142, 170 152" stroke-width="2.5" />
+    <!-- Right Drapery Ribbon Tail -->
+    <path class="brand-bow" d="M 203 117 C 210 130, 222 142, 230 152" stroke-width="2.5" />
+  </g>
+
+  <!-- 4. Authentic Master Calligraphic Logotype "Plush" -->
+  <text x="200" y="214" class="brand-title">Plush</text>
+
+  <!-- 5. "C R A F T S" Spaced Capital Typography -->
+  <text x="200" y="254" class="brand-sub">C R A F T S</text>
+
+  <!-- 6. Tagline: "handmade with heart ♡" -->
+  <text x="200" y="292" class="brand-tag">handmade with heart ♡</text>
+</svg>
