@@ -253,9 +253,14 @@ function initPreloader() {
   const preloader = document.getElementById('plushPreloader');
   if (!preloader) return;
 
+  // Allow clicking anywhere to skip
+  preloader.style.cursor = 'pointer';
+  preloader.addEventListener('click', dismissPreloader);
+
+  const duration = window.innerWidth <= 768 ? 2200 : 4500;
   preloaderTimer = setTimeout(() => {
     dismissPreloader();
-  }, 5000); // exactly 5 seconds
+  }, duration);
 }
 
 function dismissPreloader() {
@@ -535,6 +540,12 @@ function refreshCartState() {
     counter.style.display = totalCount > 0 ? 'flex' : 'none';
   }
 
+  const mobileBadge = document.getElementById('mobileBagBadge');
+  if (mobileBadge) {
+    mobileBadge.textContent = totalCount;
+    mobileBadge.style.display = totalCount > 0 ? 'inline-flex' : 'none';
+  }
+
   if (!scrollBox) return;
 
   if (cart.length === 0) {
@@ -736,21 +747,21 @@ function openProductDetail(id) {
   if (!curtain || !slot) return;
 
   slot.innerHTML = `
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start;">
-      <div style="border: 1px solid var(--color-border); border-radius: var(--radius-sm); overflow: hidden; background-color: var(--color-surface-alt);">
-        <img src="${p.image}" alt="${p.name}" style="width: 100%; height: 400px; object-fit: cover;" />
+    <div class="modal-product-layout">
+      <div class="modal-product-img-card">
+        <img src="${p.image}" alt="${p.name}" class="modal-product-img" />
       </div>
-      <div>
-        <span style="font-size: 0.8rem; font-weight: 600; color: var(--color-ink-muted); margin-bottom: 6px; display: block;">${p.provenance}</span>
-        <h2 style="font-size: 1.8rem; margin-bottom: 12px; font-weight: 700; color: var(--color-ink);">${p.name}</h2>
-        <div style="margin-bottom: 16px;">
-          <span style="font-size: 1.6rem; font-weight: 800; color: var(--color-red);">₹ ${p.price.toLocaleString('en-IN')}</span>
-          <span style="font-size: 1rem; color: var(--color-ink-light); text-decoration: line-through; margin-left: 8px;">₹ ${p.originalPrice.toLocaleString('en-IN')}</span>
+      <div class="modal-product-body">
+        <span class="modal-product-provenance">${p.provenance}</span>
+        <h2 class="modal-product-title">${p.name}</h2>
+        <div class="modal-product-price-row">
+          <span class="modal-product-price">₹ ${p.price.toLocaleString('en-IN')}</span>
+          <span class="modal-product-original">₹ ${p.originalPrice.toLocaleString('en-IN')}</span>
         </div>
-        <p style="font-size: 0.95rem; color: var(--color-ink-muted); line-height: 1.65; margin-bottom: 20px;">
+        <p class="modal-product-desc">
           ${p.fullDescription}
         </p>
-        <div style="background-color: var(--color-surface-soft); border: 1px solid var(--color-border); border-radius: var(--radius-xs); padding: 16px; margin-bottom: 24px; font-size: 0.86rem; display: flex; flex-direction: column; gap: 6px;">
+        <div class="modal-product-spec-box">
           <div><strong>Material:</strong> ${p.material}</div>
           <div><strong>Size:</strong> ${p.dimensions}</div>
           <div><strong>Crafting Time:</strong> ${p.craftTime}</div>
@@ -783,6 +794,32 @@ function closeProductDetail() {
   const curtain = document.getElementById('detailCurtain');
   if (curtain) {
     curtain.classList.remove('active');
+  }
+}
+
+// --- Mobile Navigation Drawer Handlers ---
+function toggleMobileMenu() {
+  const drawer = document.getElementById('mobileMenuDrawer');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  if (drawer && backdrop) {
+    const isOpen = drawer.classList.contains('active');
+    if (isOpen) {
+      closeMobileMenu();
+    } else {
+      drawer.classList.add('active');
+      backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+}
+
+function closeMobileMenu() {
+  const drawer = document.getElementById('mobileMenuDrawer');
+  const backdrop = document.getElementById('mobileMenuBackdrop');
+  if (drawer && backdrop) {
+    drawer.classList.remove('active');
+    backdrop.classList.remove('active');
+    document.body.style.overflow = '';
   }
 }
 
@@ -822,6 +859,7 @@ function bindGlobalEvents() {
     if (e.key === 'Escape') {
       closeBagDrawer();
       closeProductDetail();
+      closeMobileMenu();
     }
   });
 }
